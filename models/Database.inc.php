@@ -158,6 +158,8 @@ class Database {
 	 */
 	public function loadSurveysByKeyword($keyword) {
 		/* TODO  */
+		return array(new Survey("baba","mon nom est Aboubacar"),
+					 new Survey("toto", "mon nom est toto"));
 	}
 
 

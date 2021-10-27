@@ -1,9 +1,10 @@
-<?php 
+<?php
 
 require_once("models/MessageModel.inc.php");
 require_once("actions/Action.inc.php");
 
-class SignUpAction extends Action {
+class SignUpAction extends Action
+{
 
 	/**
 	 * Traite les données envoyées par le formulaire d'inscription
@@ -21,34 +22,41 @@ class SignUpAction extends Action {
 	 *
 	 * @see Action::run()
 	 */
-	public function run() {
+	public function run()
+	{
 		/* TODO  */
 		$nickname = $_POST['signUpLogin'];
 		$pass = $_POST['signUpPassword'];
 		$pass2 = $_POST['signUpPassword2'];
+		if ($pass === $pass2) {
 
-		if($pass === $pass2){
+			if ($this->database->addUser($nickname, $pass)) {
 
-			if($this->database->addUser($nickname,$pass)){
+				$this->setModel(new MessageModel);
+				$this->getModel()->setMessage("reussi");
+				$this->setView(getViewByName("Message"));
+				
+			} else {
+				$this->setModel(new MessageModel);
+				$this->getModel()->setMessage("erreur");
+				$this->setView(getViewByName("signUpForm"));
+				
 
-			}else{
-			
 			}
-		}else{
+		} else {
 			$this->setModel(new MessageModel);
-		//	$this->getModel()->setMessage("erreur");
+			$this->getModel()->setMessage("erreur");
 			$this->setView(getViewByName("signUpForm"));
-		}	
+			var_dump($this->getView());
+			die;
+		}
 	}
 
-	private function createSignUpFormView($message) {
+	private function createSignUpFormView($message)
+	{
 		$this->setModel(new MessageModel());
-	//	$this->getModel()->setMessage($message);
+		//	$this->getModel()->setMessage($message);
 		$this->getModel()->setLogin($this->getSessionLogin());
 		$this->setView(getViewByName("SignUpForm"));
 	}
-
 }
-
-
-?>
