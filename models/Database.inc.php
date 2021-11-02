@@ -1,8 +1,9 @@
-<?php 
+<?php
 require_once("models/Survey.inc.php");
 require_once("models/Response.inc.php");
 
-class Database {
+class Database
+{
 
 	private $connection;
 
@@ -10,7 +11,8 @@ class Database {
 	 * Ouvre la base de données. Si la base n'existe pas elle
 	 * est créée à l'aide de la méthode createDataBase().
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 
 
 		$this->connection = new PDO("sqlite:database.sqlite");
@@ -18,7 +20,7 @@ class Database {
 
 		$q = $this->connection->query('SELECT name FROM sqlite_master WHERE type="table"');
 
-		if (count($q->fetchAll())==0) {
+		if (count($q->fetchAll()) == 0) {
 			$this->createDataBase();
 		}
 	}
@@ -35,7 +37,8 @@ class Database {
 	 *		title char(255),
 	 *		count integer);
 	 */
-	private function createDataBase() {
+	private function createDataBase()
+	{
 		/* TODO  */
 	}
 
@@ -46,9 +49,19 @@ class Database {
 	 * @param string $nickname Pseudonyme à vérifier.
 	 * @return boolean True si le pseudonyme est valide, false sinon.
 	 */
-	private function checkNicknameValidity($nickname) {
+	private function checkNicknameValidity($nickname)
+	{
 		/* TODO  */
-		return true;
+		$nickname = $_POST['nickname'];
+		$query = $this->connection->prepare("SELECT * FROM USERS WHERE nickname = $nickname");
+		$result = $query->execute([$nickname]);
+	//	$user = $result->fetch(PDO::FETCH_ASSOC);
+
+
+		// if ($user) {
+		// 	// le nom existe déja 
+		// }
+		return false;
 	}
 
 	/**
@@ -58,8 +71,10 @@ class Database {
 	 * @param string $password Mot de passe à vérifier.
 	 * @return boolean True si le mot de passe est valide, false sinon.
 	 */
-	private function checkPasswordValidity($password) {
+	private function checkPasswordValidity($password)
+	{
 		/* TODO  */
+
 		return true;
 	}
 
@@ -69,8 +84,13 @@ class Database {
 	 * @param string $nickname Pseudonyme à vérifier.
 	 * @return boolean True si le pseudonyme est disponible, false sinon.
 	 */
-	private function checkNicknameAvailability($nickname) {
+	private function checkNicknameAvailability($nickname)
+	{
 		/* TODO  */
+		$nickname = $_POST['nickname'];
+		$query = $this->connection->prepare("SELECT * FROM USERS WHERE nickname = $nickname");
+		$result = $query->execute([$nickname]);
+	//	$user = $result->fetch(PDO::FETCH_ASSOC);
 		return false;
 	}
 
@@ -81,9 +101,33 @@ class Database {
 	 * @param string $password Mot de passe.
 	 * @return boolean True si le couple est correct, false sinon.
 	 */
-	public function checkPassword($nickname, $password) {
+	public function checkPassword($nickname, $password)
+	{
 		/* TODO  */
-		return true;
+		if (isset($_POST['nickname']) && isset($_POST['password'])) {
+			if (!empty($nickname) && !empty($password)) {
+				$nickname = $_POST['nickname'];
+				$password = $_POST['password'];
+				// préparer la requête
+				$query = $this->connection->prepare('INSERT INTO  USERS(nickname,password) VALUES( :nickname, :password)');
+				// $query->bindValue(':nickname',$nickname,PDO::PARAM_STR);
+				// $query->bindValue(':password',$password,PDO::PARAM_STR);
+				$password = password_hash($password, PASSWORD_DEFAULT);
+				
+				 $query->execute([
+					 "nickname" => "$nickname",
+					 "password" => "$password"
+				 ]);
+			} else {
+				return "veuillez remplir tous les champs";
+			}
+		}
+		// echo '<pre>';
+		// var_dump($user);
+		// echo '</pre>';
+		// die;
+		
+		return false;
 	}
 
 	/**
@@ -97,7 +141,8 @@ class Database {
 	 * @param string $password Mot de passe.
 	 * @return boolean|string True si le couple a été ajouté avec succès, un message d'erreur sinon.
 	 */
-	public function addUser($nickname, $password) {
+	public function addUser($nickname, $password)
+	{
 		/* TODO  */
 		return true;
 	}
@@ -112,7 +157,8 @@ class Database {
 	 * @param string $password Nouveau mot de passe.
 	 * @return boolean|string True si le mot de passe a été modifié, un message d'erreur sinon.
 	 */
-	public function updateUser($nickname, $password) {
+	public function updateUser($nickname, $password)
+	{
 		/* TODO  */
 		return true;
 	}
@@ -124,7 +170,8 @@ class Database {
 	 * @param Survey $survey Sondage à sauvegarder.
 	 * @return boolean True si la sauvegarde a été réalisée avec succès, false sinon.
 	 */
-	public function saveSurvey(&$survey) {
+	public function saveSurvey(&$survey)
+	{
 		/* TODO  */
 		return true;
 	}
@@ -135,7 +182,8 @@ class Database {
 	 * @param Survey $response Réponse à sauvegarder.
 	 * @return boolean True si la sauvegarde a été réalisée avec succès, false sinon.
 	 */
-	private function saveResponse(&$response) {
+	private function saveResponse(&$response)
+	{
 		/* TODO  */
 		return true;
 	}
@@ -146,7 +194,8 @@ class Database {
 	 * @param string $owner Pseudonyme de l'utilisateur.
 	 * @return array(Survey)|boolean Sondages trouvés par la fonction ou false si une erreur s'est produite.
 	 */
-	public function loadSurveysByOwner($owner) {
+	public function loadSurveysByOwner($owner)
+	{
 		/* TODO  */
 	}
 
@@ -156,10 +205,13 @@ class Database {
 	 * @param string $keyword Mot clé à chercher.
 	 * @return array(Survey)|boolean Sondages trouvés par la fonction ou false si une erreur s'est produite.
 	 */
-	public function loadSurveysByKeyword($keyword) {
+	public function loadSurveysByKeyword($keyword)
+	{
 		/* TODO  */
-		return array(new Survey("baba","mon nom est Aboubacar"),
-					 new Survey("toto", "mon nom est toto"));
+		return array(
+			new Survey("baba", "mon nom est Aboubacar"),
+			new Survey("toto", "mon nom est toto")
+		);
 	}
 
 
@@ -169,7 +221,8 @@ class Database {
 	 * @param int $id Identifiant de la réponse.
 	 * @return boolean True si le vote a été enregistré, false sinon.
 	 */
-	public function vote($id) {
+	public function vote($id)
+	{
 		/* TODO  */
 	}
 
@@ -180,7 +233,8 @@ class Database {
 	 * @param array $arraySurveys Tableau de lignes.
 	 * @return array(Survey)|boolean Le tableau de sondages ou false si une erreur s'est produite.
 	 */
-	private function loadSurveys($arraySurveys) {
+	private function loadSurveys($arraySurveys)
+	{
 		$surveys = array();
 		/* TODO  */
 		return $surveys;
@@ -193,10 +247,8 @@ class Database {
 	 * @param array $arraySurveys Tableau de lignes.
 	 * @return array(Response)|boolean Le tableau de réponses ou false si une erreur s'est produite.
 	 */
-	private function loadResponses(&$survey, $arrayResponses) {
+	private function loadResponses(&$survey, $arrayResponses)
+	{
 		/* TODO  */
 	}
-
 }
-
-?>
