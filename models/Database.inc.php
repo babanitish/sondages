@@ -52,15 +52,10 @@ class Database
 	private function checkNicknameValidity($nickname)
 	{
 		/* TODO  */
-		$nickname = $_POST['nickname'];
-		$query = $this->connection->prepare("SELECT * FROM USERS WHERE nickname = $nickname");
-		$result = $query->execute([$nickname]);
-	//	$user = $result->fetch(PDO::FETCH_ASSOC);
+		if (preg_match('/[a-zA-Z]{3,10}/', $nickname)) {
 
-
-		// if ($user) {
-		// 	// le nom existe déja 
-		// }
+			return true;
+		}
 		return false;
 	}
 
@@ -73,8 +68,13 @@ class Database
 	 */
 	private function checkPasswordValidity($password)
 	{
-		/* TODO  */
+		$uppercase = preg_match('@[A-Z]@', $password);
+		$lowercase = preg_match('@[a-z]@', $password);
+		$number    = preg_match('@[0-9]@', $password);
 
+		if (!$uppercase || !$lowercase || !$number || strlen($password) < 8) {
+			return false;
+		}
 		return true;
 	}
 
@@ -86,12 +86,22 @@ class Database
 	 */
 	private function checkNicknameAvailability($nickname)
 	{
-		/* TODO  */
-		$nickname = $_POST['nickname'];
-		$query = $this->connection->prepare("SELECT * FROM USERS WHERE nickname = $nickname");
-		$result = $query->execute([$nickname]);
-	//	$user = $result->fetch(PDO::FETCH_ASSOC);
-		return false;
+		// /* TODO  */
+		// if(!empty($_POST['nickname'])){
+		// 	$nickname = $_POST['nickname'];
+		// 	// préparer la requête et nettoyer les données 
+		// 	$nickname = $this->connection->quote($nickname);
+		// 	$query = "SELECT * FROM USERS WHERE nickname = $nickname";
+		// 	//envoyer la requête et récupérer le résultat
+		// 	$result = $this->connection->query($query);
+		// 	//traiter le résultat : extraire une ou plusieurs lignes 
+		// 	$user = $result->fetch(PDO::FETCH_ASSOC);
+		// 	if (!empty($user)) {
+		// 		return false;
+		// 	}
+		// 		return true;
+		// }	
+		return true;	
 	}
 
 	/**
@@ -108,25 +118,46 @@ class Database
 			if (!empty($nickname) && !empty($password)) {
 				$nickname = $_POST['nickname'];
 				$password = $_POST['password'];
+				//nettoyer
+				$nickname = $this->connection->quote($nickname);
 				// préparer la requête
-				$query = $this->connection->prepare('INSERT INTO  USERS(nickname,password) VALUES( :nickname, :password)');
-				// $query->bindValue(':nickname',$nickname,PDO::PARAM_STR);
-				// $query->bindValue(':password',$password,PDO::PARAM_STR);
-				$password = password_hash($password, PASSWORD_DEFAULT);
-				
-				 $query->execute([
-					 "nickname" => "$nickname",
-					 "password" => "$password"
-				 ]);
-			} else {
-				return "veuillez remplir tous les champs";
+				$query = "SELECT password FROM USERS WHERE nickname = $nickname";
+				// récupérer le resultat
+				$result = $this->connection->query($query);
+				$user = $result->fetch(PDO::FETCH_ASSOC);
+				if ($user) {
+					return password_verify($password, $user['password']);
+				}
 			}
+			return false;
 		}
+
+
+
+
+		// if (isset($_POST['nickname']) && isset($_POST['password'])) {
+		// 	if (!empty($nickname) && !empty($password)) {
+		// 		$nickname = $_POST['nickname'];
+		// 		$password = $_POST['password'];
+		// 		// préparer la requête
+		// 		$query = $this->connection->prepare('INSERT INTO  USERS(nickname,password) VALUES( :nickname, :password)');
+		// 		// $query->bindValue(':nickname',$nickname,PDO::PARAM_STR);
+		// 		// $query->bindValue(':password',$password,PDO::PARAM_STR);
+		// 		$password = password_hash($password, PASSWORD_DEFAULT);
+
+		// 		 $query->execute([
+		// 			 "nickname" => "$nickname",
+		// 			 "password" => "$password"
+		// 		 ]);
+		// 	} else {
+		// 		return "veuillez remplir tous les champs";
+		// 	}
+		// }
 		// echo '<pre>';
 		// var_dump($user);
 		// echo '</pre>';
 		// die;
-		
+
 		return false;
 	}
 
@@ -144,6 +175,13 @@ class Database
 	public function addUser($nickname, $password)
 	{
 		/* TODO  */
+		if (!$this->checkNicknameValidity($nickname)) {
+			return "Le pseudo doit contenir entre 3 et 10 lettres.";
+		} else if (!$this->checkPasswordValidity($password)) {
+			return "Le mot de passe doit contenir entre 3 et 10 caractères.";
+		} else if (!$this->checkNicknameAvailability($nickname)) {
+			return "Le pseudo existe déjà.";
+		}
 		return true;
 	}
 

@@ -28,34 +28,35 @@ class SignUpAction extends Action
 		$nickname = $_POST['signUpLogin'];
 		$pass = $_POST['signUpPassword'];
 		$pass2 = $_POST['signUpPassword2'];
-		if ($pass === $pass2) {
 
-			if ($this->database->addUser($nickname, $pass)) {
-
+		if(!empty($nickname) && !empty($pass) && !empty($pass2)){
+			if ($pass === $pass2) {
+				$result = $this->database->addUser($nickname, $pass);
+				if ($result === true) {
+					$this->setModel(new MessageModel);
+					$this->getModel()->setMessage("félicitation vous êtes inscris");
+					$this->setView(getViewByName("Message"));
+				}else{
+					$this->setModel(new MessageModel);
+					$this->getModel()->setMessage($result);
+					$this->setView(getViewByName("signUpForm"));	
+				}
+			}else{
 				$this->setModel(new MessageModel);
-				$this->getModel()->setMessage("reussi");
-				$this->setView(getViewByName("Message"));
-				
-			} else {
-				$this->setModel(new MessageModel);
-				$this->getModel()->setMessage("erreur");
+				$this->getModel()->setMessage("Le mot de passe et sa confirmation sont différents");
 				$this->setView(getViewByName("signUpForm"));
-				
-
 			}
-		} else {
+		}else{
 			$this->setModel(new MessageModel);
-			$this->getModel()->setMessage("erreur");
-			$this->setView(getViewByName("signUpForm"));
-			var_dump($this->getView());
-			die;
+				$this->getModel()->setMessage("remplissez");
+				$this->setView(getViewByName("signUpForm"));
 		}
 	}
 
 	private function createSignUpFormView($message)
 	{
 		$this->setModel(new MessageModel());
-		//	$this->getModel()->setMessage($message);
+		$this->getModel()->setMessage($message);
 		$this->getModel()->setLogin($this->getSessionLogin());
 		$this->setView(getViewByName("SignUpForm"));
 	}

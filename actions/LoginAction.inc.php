@@ -18,8 +18,8 @@ class LoginAction extends Action {
 	public function run() {
 		/* TODO  */
 		$this->setModel(new Model);
-
-		if($this->database->checkPassword($_POST['nickname'], $_POST['password'])){
+		$checkPass = $this->database->checkPassword($_POST['nickname'], $_POST['password']);
+		if(!empty($_POST['nickname']) && !empty($_POST['password']) && $checkPass){
 			$this->getModel()->setLogin($_POST['nickname']);
 			$this->setSessionLogin($_POST['nickname']);
 		}else{
