@@ -87,21 +87,16 @@ class Database
 	private function checkNicknameAvailability($nickname)
 	{
 		// /* TODO  */
-		// if(!empty($_POST['nickname'])){
-		// 	$nickname = $_POST['nickname'];
-		// 	// préparer la requête et nettoyer les données 
-		// 	$nickname = $this->connection->quote($nickname);
-		// 	$query = "SELECT * FROM USERS WHERE nickname = $nickname";
-		// 	//envoyer la requête et récupérer le résultat
-		// 	$result = $this->connection->query($query);
-		// 	//traiter le résultat : extraire une ou plusieurs lignes 
-		// 	$user = $result->fetch(PDO::FETCH_ASSOC);
-		// 	if (!empty($user)) {
-		// 		return false;
-		// 	}
-		// 		return true;
-		// }	
-		return true;	
+		$sql = "SELECT * FROM `USERS` WHERE `nickname` = :nickname";
+		$query = $this->connection->prepare($sql);
+		$query->bindValue(":nickname", $_POST['signUpLogin'], PDO::PARAM_STR);
+		$query->execute();
+		$user = $query->fetch(PDO::FETCH_ASSOC);
+		if (!$user) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -132,32 +127,6 @@ class Database
 			return false;
 		}
 
-
-
-
-		// if (isset($_POST['nickname']) && isset($_POST['password'])) {
-		// 	if (!empty($nickname) && !empty($password)) {
-		// 		$nickname = $_POST['nickname'];
-		// 		$password = $_POST['password'];
-		// 		// préparer la requête
-		// 		$query = $this->connection->prepare('INSERT INTO  USERS(nickname,password) VALUES( :nickname, :password)');
-		// 		// $query->bindValue(':nickname',$nickname,PDO::PARAM_STR);
-		// 		// $query->bindValue(':password',$password,PDO::PARAM_STR);
-		// 		$password = password_hash($password, PASSWORD_DEFAULT);
-
-		// 		 $query->execute([
-		// 			 "nickname" => "$nickname",
-		// 			 "password" => "$password"
-		// 		 ]);
-		// 	} else {
-		// 		return "veuillez remplir tous les champs";
-		// 	}
-		// }
-		// echo '<pre>';
-		// var_dump($user);
-		// echo '</pre>';
-		// die;
-
 		return false;
 	}
 
@@ -182,7 +151,17 @@ class Database
 		} else if (!$this->checkNicknameAvailability($nickname)) {
 			return "Le pseudo existe déjà.";
 		}
-		return true;
+		$password = password_hash($password, PASSWORD_DEFAULT);
+		$sql = "INSERT INTO  USERS(nickname,password) VALUES(:nickname, :password)";
+		$query = $this->connection->prepare($sql);
+		$query->bindValue(":nickname", $nickname, PDO::PARAM_STR);
+		$query->bindValue(":password", $password, PDO::PARAM_STR);
+		$query->execute();
+		if ($query->rowCount() > 0) {
+			return true;
+		} else {
+			return "Erreur lors de l'insertion";
+		}
 	}
 
 	/**
