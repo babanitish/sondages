@@ -23,11 +23,30 @@ class UpdateUserAction extends Action {
 	 */
 	public function run() {
 		/* TODO  */
+		
+		if(!empty($_POST['updatePassword']) && !empty($_POST['updatePassword2'])){
+			$updatePass = $_POST['updatePassword'];
+			$updatePass2 = $_POST['updatePassword2'];
+			// on récupère la session de l'utilisateur avec le getSessionLogin() sinon sa ne marcherait pas
+			$message = $this->database->updateUser($this->getSessionLogin(),$updatePass);
+			if($updatePass === $updatePass2){
+				if($message == true){
+					$message = "Modification enregistrée.";
+				}else{
+					$this->createUpdateUserFormView($message);
+				}
+			}else{
+				$message = "le mot de passe et sa confirmation sont différents";
+			}
+		}else{
+			$message = "veuillez remplir les champs";
+		}
+
 	}
 
 	private function createUpdateUserFormView($message) {
 		$this->setModel(new MessageModel());
-		$this->getModel()->setMessage($message);
+	//	$this->getModel()->setMessage($message);
 		$this->getModel()->setLogin($this->getSessionLogin());
 		$this->setView(getViewByName("UpdateUserForm"));
 	}

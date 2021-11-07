@@ -22,9 +22,9 @@ function getAction() {
 			'SignUp',
 			'Logout',
 			'Login',
-			/*'UpdateUserForm',
+			'UpdateUserForm',
 			'UpdateUser',
-			'AddSurveyForm',
+			/*'AddSurveyForm',
 			'AddSurvey',
 			'GetMySurveys',*/
 			'Search',
